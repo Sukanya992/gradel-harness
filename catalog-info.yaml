@@ -1,4 +1,4 @@
-apiVersion: scaffolder.backstage.io/v1beta3
+apiVersion: harness.io/v1
 kind: Template
 metadata:
   name: new-java-service
