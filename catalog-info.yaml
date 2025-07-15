@@ -1,0 +1,14 @@
+apiVersion: harness.io/v1
+kind: Component
+metadata:
+  name: my-gradle-harness-app # A unique, lowercase, alphanumeric name
+  description: My application built with Gradle and integrated with Harness # Human-readable description
+  annotations:
+    # Optional: Add annotations for specific integrations, e.g., if you have a Harness project URL
+    # harness.io/project-url: "https://app.harness.io/ng/account/<YOUR_ACCOUNT_ID>/cd/orgs/<YOUR_ORG_ID>/projects/<YOUR_PROJECT_ID>"
+    # github.com/project-slug: Sukanya992/gradel-harness # Points to your GitHub repo
+spec:
+  type: service # Or 'library', 'website', etc. depending on your component
+  lifecycle: production # Or 'experimental', 'deprecated'
+  owner: team-platform # Replace with the actual owner/team identifier in your IDP
+  # system: my-system # Optional: if this component belongs to a larger system
