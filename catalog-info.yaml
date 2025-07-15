@@ -1,14 +1,73 @@
-apiVersion: harness.io/v1
-kind: Component
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
 metadata:
-  name: my-gradle-harness-app # A unique, lowercase, alphanumeric name
-  description: My application built with Gradle and integrated with Harness # Human-readable description
-  annotations:
-    # Optional: Add annotations for specific integrations, e.g., if you have a Harness project URL
-    # harness.io/project-url: "https://app.harness.io/ng/account/<YOUR_ACCOUNT_ID>/cd/orgs/<YOUR_ORG_ID>/projects/<YOUR_PROJECT_ID>"
-    # github.com/project-slug: Sukanya992/gradel-harness # Points to your GitHub repo
+  name: new-java-service
+  title: Create New Java Microservice
+  description: Scaffolds a new Spring Boot service with basic boilerplate.
+  tags:
+    - java
+    - spring-boot
+    - service
 spec:
-  type: service # Or 'library', 'website', etc. depending on your component
-  lifecycle: production # Or 'experimental', 'deprecated'
-  owner: team-platform # Replace with the actual owner/team identifier in your IDP
-  # system: my-system # Optional: if this component belongs to a larger system
+  owner: team-platform
+  type: service
+  parameters:
+    - title: Service Details
+      required:
+        - serviceName
+        - owner
+      properties:
+        serviceName:
+          title: Service Name
+          type: string
+          description: Unique name for your new service (e.g., order-processor)
+          ui:autofocus: true
+        description:
+          title: Description
+          type: string
+          description: A brief description of the service.
+        owner:
+          title: Owner
+          type: string
+          description: The team responsible for this service (e.g., team-backend)
+          ui:field: OwnerPicker # A Backstage-specific UI component
+    - title: Git Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository URL
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts: ['github.com']
+  steps:
+    - id: fetch-base
+      name: Fetch Base Template
+      action: fetch:template
+      input:
+        url: ./template # Assuming a 'template' folder exists in this repo
+        values:
+          serviceName: ${{ parameters.serviceName }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        sourcePath: './'
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml' # Path to the generated catalog-info.yaml
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
